@@ -1,0 +1,25 @@
+{
+  "releaseId": "qcat-ecc-random-v2",
+  "taskVersion": "ecc-random-v2",
+  "policy": "qcat-ecc-random-10048-v1",
+  "sourceRevision": "3eefcf216ca37cba0ae3f56212d6b1302844a249",
+  "nativeSourceSha256": "038955042acdbdc0484f056d876564b6be2cea4e76ae93055384fd49159d35e1",
+  "maxCircuitBytes": 134217728,
+  "maxDurationMs": 7200000,
+  "maxLogBytes": 8388608,
+  "platformPrecheck": "implemented",
+  "publicVerification": "not_implemented",
+  "requestedInputs": 10048,
+  "maxIncorrectInputs": 1,
+  "inputSpec": {
+    "scalarDistribution": "uniform 1 <= k < secp256k1 order; reject out-of-range candidates",
+    "pointDomain": "two non-infinity points with different x coordinates",
+    "inputDomain": "qcat-ecc-random-10048-v1/inputs",
+    "measurementDomain": "qcat-ecc-random-10048-v1/measurement",
+    "seedBytes": 32,
+    "inputDigest": "sha3-256 of sequential tx,ty,ox,oy as 32-byte little-endian coordinates",
+    "batchSize": 64,
+    "errorRule": "union of classical, phase and workspace failures by input; at most 1",
+    "batches": 157
+  }
+}

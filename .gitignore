@@ -1,0 +1,25 @@
+# Local credentials and configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Dependencies and build products
+node_modules/
+target/
+dist/
+coverage/
+
+# Local research runs and private evidence
+.qcat-*/
+.qcat-upload-state.json
+qcat.project.json
+qcat.submission.json
+run-report.json
+run.log
+ops.bin
+ops.qdelta
+source.zip
+*.tmp
+.DS_Store

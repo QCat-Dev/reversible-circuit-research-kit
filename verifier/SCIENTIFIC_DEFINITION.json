@@ -1,0 +1,66 @@
+{
+  "releaseId": "qcat-ecc-random-v2",
+  "taskVersion": "ecc-random-v2",
+  "policy": "qcat-ecc-random-10048-v1",
+  "resultSchema": "qcat-server-result-v2",
+  "previousPlatformRelease": "qcat-ecc-fixed-v1",
+  "previousNativeSourceSha256": "06254f73c39043b1feff1dd233fd09e5229ad97a3d31810c56c1754958bc6dd7",
+  "upstreamRevision": "3eefcf216ca37cba0ae3f56212d6b1302844a249",
+  "equivalentToUpstreamFixedCorpus": false,
+  "inputCount": 10048,
+  "batches": 157,
+  "allowedIncorrectInputs": 1,
+  "incorrectInputDefinition": "union of classical/phase/quantum-workspace errors",
+  "inputDomain": "qcat-ecc-random-10048-v1/inputs",
+  "measurementDomain": "qcat-ecc-random-10048-v1/measurement",
+  "digest": "sha3-256(target.x || target.y || offset.x || offset.y for each accepted input, 32-byte LE coordinates, no prefix)",
+  "simulatorProductionChanges": [
+    "apply_iter delegates to apply_iter_masked with u64::MAX",
+    "apply_iter_masked takes live_mask and initializes root condition with it"
+  ],
+  "simulatorBodyIdenticalAfterRemovingDocumentedAdapter": true,
+  "unchangedFiles": [
+    {
+      "path": "src/circuit.rs",
+      "sha256": "ac2255f6bcb6895c9da2dfe21c3a051a0ef8fc4e0af9598634fec0035dbf35c6",
+      "byteIdenticalToBase": true
+    },
+    {
+      "path": "src/weierstrass_elliptic_curve.rs",
+      "sha256": "ecfca15ee3b831c243fbea559ff4b8937be47fe591a4f14786ec2b9bfb30bded",
+      "byteIdenticalToBase": true
+    },
+    {
+      "path": "Cargo.lock",
+      "sha256": "42ff16919e551891ad1b21821329b116d133194245a0e0734a33573dfe598e07",
+      "byteIdenticalToBase": true
+    },
+    {
+      "path": "Cargo.toml",
+      "sha256": "45ec39a88b2e0041da4d647e01db73b12d9091fc69714938e0f6eeafed008273",
+      "byteIdenticalToBase": true
+    },
+    {
+      "path": "rust-toolchain",
+      "sha256": "92b454c1ccf330de9b94242f73bc3214370fb420d5152baeec12dc82ceef9dcc",
+      "byteIdenticalToBase": true
+    }
+  ],
+  "softwareTests": 28,
+  "realScientificRuns": 0,
+  "uploads": 0,
+  "previousRandomDraftNativeSourceSha256": "8d0ec6f3ce9369b6edf27f5c045f1112fad9c91d5d6bb053f17aa71f5e402104",
+  "batchSize": 64,
+  "batchIndex": "floor(zeroBasedInputIndex / 64)",
+  "measurementWordSemantics": "one little-endian u64 per R/Hmr operation per full 64-lane batch, even if disabled; all 64 lane bits used",
+  "simulatorProductionByteIdenticalToPreviousRandomDraft": true,
+  "maxFailureDetailEntries": 10048,
+  "maxInputIndex": 10047,
+  "scoreDenominator": 10048,
+  "superseded16LaneNativeSourceSha256": "6614e15bef1375ce0d9888191e88782370d4a95904189461badb6131aa0c50a6",
+  "batchRationale": "u64 bit-sliced simulator width; round requested minimum 10000 upward to 10048=157*64; every input is real, no padding or downward rounding",
+  "samplingAlgorithmUnchangedExceptNewDomainStrings": true,
+  "samplingFunctionBodyByteIdenticalToSuperseded16LaneDraft": true,
+  "samplingFunctionBodySha256": "80f7e47a9290de1be3de6b4e66e44e728773204170f8593bda5ee05a883512a5",
+  "simulatorFileByteIdenticalToSuperseded16LaneDraft": true
+}

@@ -1,0 +1,26 @@
+{
+  "name": "@qcat/research-kit",
+  "version": "0.10.4",
+  "private": true,
+  "type": "module",
+  "description": "Editable reversible-circuit research framework, local evaluation and submission client.",
+  "engines": {
+    "node": ">=24.15 <25"
+  },
+  "exports": {
+    "./protocol": {
+      "types": "./src/protocol.d.mts",
+      "default": "./src/protocol.mjs"
+    },
+    "./delta": {
+      "types": "./src/delta.d.mts",
+      "default": "./src/delta.mjs"
+    }
+  },
+  "bin": {
+    "qcat-research": "./bin/qcat.mjs"
+  },
+  "dependencies": {
+    "zod": "4.6.7"
+  }
+}
