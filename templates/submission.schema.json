@@ -1,0 +1,220 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "qcat-research-bundle-v1"
+    },
+    "taskId": {
+      "type": "string",
+      "const": "ecc-point-addition"
+    },
+    "taskVersion": {
+      "type": "string",
+      "const": "ecc-random-v2"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 120
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 20,
+      "maxLength": 1200
+    },
+    "ai": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "usage": {
+              "type": "string",
+              "const": "none"
+            },
+            "models": {
+              "maxItems": 0,
+              "type": "array",
+              "items": {
+                "not": {}
+              }
+            }
+          },
+          "required": [
+            "usage",
+            "models"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "usage": {
+              "type": "string",
+              "const": "used"
+            },
+            "models": {
+              "minItems": 1,
+              "maxItems": 6,
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "version": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 120
+                  },
+                  "purpose": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 500
+                  }
+                },
+                "required": [
+                  "name",
+                  "version",
+                  "purpose"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "usage",
+            "models"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "parentCircuitId": {
+      "type": "string",
+      "pattern": "^(?:[A-Za-z0-9-]{3,80}|[a-f0-9-]{36})$"
+    },
+    "parentCircuitSha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "compiledCircuitSha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "compiledCircuitSizeBytes": {
+      "type": "integer",
+      "minimum": 17,
+      "maximum": 134217728
+    },
+    "provenance": {
+      "type": "object",
+      "properties": {
+        "license": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 120
+        },
+        "credits": {
+          "type": "string",
+          "minLength": 10,
+          "maxLength": 2000
+        },
+        "links": {
+          "maxItems": 6,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 600,
+            "pattern": "^https:\\/\\/"
+          }
+        }
+      },
+      "required": [
+        "license",
+        "credits",
+        "links"
+      ],
+      "additionalProperties": false
+    },
+    "sharing": {
+      "type": "string",
+      "enum": [
+        "private_review",
+        "publish_after_qualification"
+      ]
+    },
+    "artifacts": {
+      "minItems": 6,
+      "maxItems": 10,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "circuit",
+              "parameters",
+              "description",
+              "research_report",
+              "verification_report",
+              "run_log",
+              "source",
+              "supporting"
+            ]
+          },
+          "filename": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,119}$"
+          },
+          "encoding": {
+            "type": "string",
+            "enum": [
+              "qeccopsz",
+              "qcat-delta-v1",
+              "json",
+              "markdown",
+              "pdf",
+              "zip",
+              "text"
+            ]
+          },
+          "sizeBytes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 134217728
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        },
+        "required": [
+          "role",
+          "filename",
+          "encoding",
+          "sizeBytes",
+          "sha256"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "taskId",
+    "taskVersion",
+    "title",
+    "summary",
+    "ai",
+    "provenance",
+    "sharing",
+    "artifacts"
+  ],
+  "additionalProperties": false
+}

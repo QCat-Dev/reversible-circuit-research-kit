@@ -1,0 +1,66 @@
+{
+  "purpose": "software-only reference vectors; no circuit execution",
+  "seed": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+  "inputStreamFirst64": "8c2a08b34e12dc39227d0cb123966441e4c2c65fe26ac11b346ca838597ea15cbc610a0f102d082e32ca2db61eb28750c13ca632a4f73652a32958413f12b8ee",
+  "measurementStreamFirst64": "8e19e69771a4f2c74b525039be394039758977b327030ae9b08cf7b2d21d802449d63b8c142672faa6070a64d794c7312eef9650b22011eec3bea9309f59753d",
+  "count": 4,
+  "inputDigest": "34acdaf2d878dec16161074506327138b609cdb985d724a80817e95a7f8c9f2b",
+  "inputs": [
+    {
+      "target": [
+        "fa35ce5ad7384a00279796e5b4c736dbdb06e4f8ea53d01bb09f0e2cec9e691e",
+        "199e79514e638a95386c4b31781e4c7983d66da4395745be85c7111efbfa6484"
+      ],
+      "offset": [
+        "cf93e2d89fc0e4273fb198cc0600857ebee08444dc8044d25f4d29f6d4867609",
+        "5bb08a5b519bdb7531da2290a86583ed8c28e6309dab3f54caf834113808d09b"
+      ],
+      "expected": [
+        "b71d958b6b1b377b8e52c973b24da531a97d05edf6d7d41456a7fc8102def9ea",
+        "d4a6e28a51903a9a7ba5aa1def906c0d62a48c6455590d5cd74e7a5872fcad6f"
+      ]
+    },
+    {
+      "target": [
+        "67f013eac0dfdac24787187b40cc6293bd312d52d6a4a4f12405c38be62c9a0b",
+        "c4a36533ad8a06716c730e524d7627e52f4a0c694dcaa1b149df8ca1aa613b6c"
+      ],
+      "offset": [
+        "f457750f3f13b91c8186b9e49795e0c1f71fdaf6bc87f631a8872d6f13337d6a",
+        "973e3abf790a06832af5783c60bf2913115b1792986779fbda3778848fa4cab3"
+      ],
+      "expected": [
+        "776a21876193a38fb88014c05ceefa1a30d79c009b25834191a22a25cf8eb2af",
+        "4df82601f8707523236b2ff7f200af7692a13c2d4c96af5438685e79566a06e8"
+      ]
+    },
+    {
+      "target": [
+        "eaad01b6ee4d74498ab798b6b0457e6f5b106bee96d7b2702ab44d1231cc12bd",
+        "b58bffeafa19ad3999f6286a8510d01993d86e8e7ccdfe55e5847a3f863e14dd"
+      ],
+      "offset": [
+        "326a9f11ff972f89b1211eddb94d0949297bf44e08805b0fc625d971b11b916b",
+        "1cd6615fd14927951d53d92c4616fa4b9250a1c17dfd38e0d6657f338b85e707"
+      ],
+      "expected": [
+        "8817ee34323eafcf9533289db69a83f4b2847a948327c3487740e9659a46b75f",
+        "33f9e50b11e080d3927c41be7c8a994c7eaeb900f7f7b31b0477826d91f59a1f"
+      ]
+    },
+    {
+      "target": [
+        "4ddcda45116434f93c286b5313516c8b61a4ddc4ba88138ed7e4c711a564f562",
+        "8371b43b18cf13f860fcc2eba6bdf05c1cd7a23b95e18791fa333ddf61c528fc"
+      ],
+      "offset": [
+        "e59fbfd8ef33f606c3215689802c71fbf4e54cad1f283bd6059434cb231688c4",
+        "77e3563324375c2987c67f071d1eb57f3038f1f4dd589408a4163dcabd823447"
+      ],
+      "expected": [
+        "d20305bbb1a2977cfa58f809ab9aee331bb52fec594cfc15bdc5405ca44f59b0",
+        "fa4cfa2c95b17798df6da9bd40eb616d2b7bd27647dcf9908552c81ae617da75"
+      ]
+    }
+  ]
+}

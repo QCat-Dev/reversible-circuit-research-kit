@@ -1,0 +1,91 @@
+{
+  "releaseId": "qcat-ecc-random-v2",
+  "taskVersion": "ecc-random-v2",
+  "policy": "qcat-ecc-random-10048-v1",
+  "requestedInputs": 10048,
+  "batchSize": 64,
+  "executedBatchesRequired": 157,
+  "maxIncorrectInputs": 1,
+  "upstreamRevision": "3eefcf216ca37cba0ae3f56212d6b1302844a249",
+  "upstreamOrigin": "https://github.com/Layr-Labs/ecdsafail-challenge",
+  "baseReleaseId": "qcat-ecc-random-v1",
+  "baseNativeSourceSha256": "6614e15bef1375ce0d9888191e88782370d4a95904189461badb6131aa0c50a6",
+  "rustToolchain": "1.93.0",
+  "nativeSourceSha256": "038955042acdbdc0484f056d876564b6be2cea4e76ae93055384fd49159d35e1",
+  "hashAlgorithm": "SHA256 of UTF-8 lines sorted by relative path: path + TAB + sha256 + LF; SOURCE_MANIFEST.json and target/ excluded",
+  "files": [
+    {
+      "path": "Cargo.lock",
+      "bytes": 46208,
+      "sha256": "42ff16919e551891ad1b21821329b116d133194245a0e0734a33573dfe598e07"
+    },
+    {
+      "path": "Cargo.toml",
+      "bytes": 322,
+      "sha256": "45ec39a88b2e0041da4d647e01db73b12d9091fc69714938e0f6eeafed008273"
+    },
+    {
+      "path": "NOTICE",
+      "bytes": 2320,
+      "sha256": "19f77d6b69b28e509c496a08b0bd6e26796c5d5a1dbc4ae0966bb1f915a32d0e"
+    },
+    {
+      "path": "README.md",
+      "bytes": 9498,
+      "sha256": "df1e1d53352b20c7078363a8af67ad7fb6194e2f8c967685f63a4863f0ba6617"
+    },
+    {
+      "path": "RULES_REVIEW.md",
+      "bytes": 3309,
+      "sha256": "5a878c182f8464bedef974beedb93d5d682501c394e9a39cb543d7859803354d"
+    },
+    {
+      "path": "SCIENTIFIC_DEFINITION.json",
+      "bytes": 3014,
+      "sha256": "887686362029c3e060a35ba9531eb20baa7f6374067da3f112c8954e89a99023"
+    },
+    {
+      "path": "rust-toolchain",
+      "bytes": 31,
+      "sha256": "92b454c1ccf330de9b94242f73bc3214370fb420d5152baeec12dc82ceef9dcc"
+    },
+    {
+      "path": "src/bin/server_eval.rs",
+      "bytes": 47751,
+      "sha256": "a21729bf165abb62d3b8b78010507fc04885190a8e4a69d25a3198045095379c"
+    },
+    {
+      "path": "src/circuit.rs",
+      "bytes": 13421,
+      "sha256": "ac2255f6bcb6895c9da2dfe21c3a051a0ef8fc4e0af9598634fec0035dbf35c6"
+    },
+    {
+      "path": "src/lib.rs",
+      "bytes": 349,
+      "sha256": "6345661353339ebbebd734a92d4c5c5b39f82a2107e3b5fc48621be7843a8e16"
+    },
+    {
+      "path": "src/sim.rs",
+      "bytes": 15854,
+      "sha256": "c35762468a5b9d1ddd1010a26664c72d2097aed915a29f7bd385c1ea7f6207a6"
+    },
+    {
+      "path": "src/weierstrass_elliptic_curve.rs",
+      "bytes": 4485,
+      "sha256": "ecfca15ee3b831c243fbea559ff4b8937be47fe591a4f14786ec2b9bfb30bded"
+    },
+    {
+      "path": "tests/sampling-vectors.json",
+      "bytes": 2778,
+      "sha256": "21f40d0bc7ab31253104e5b7fc36ab1b8905b6ea5a123276d88b2b1c0a04edc7"
+    },
+    {
+      "path": "tests/sampling_vectors.py",
+      "bytes": 2358,
+      "sha256": "0ca1887ebca9f88e5ba4f21eaa5932c5f18852b0e9439e696010b280d589a61b"
+    }
+  ],
+  "softwareUnitTestsPassed": 28,
+  "realScientificRuns": 0,
+  "uploads": 0
+}

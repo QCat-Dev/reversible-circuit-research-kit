@@ -1,0 +1,13 @@
+import type { z } from 'zod';
+export const KIT_VERSION: string, BUNDLE_VERSION: string, TASK_VERSION: string, SAMPLING_POLICY: string, MAX_BUNDLE_BYTES: number, RANDOM_INPUTS: number, RANDOM_BATCHES: number, BATCH_SIZE: number;
+export const artifactRules: Array<{role:string;label:string;required:boolean;maxCount:number;maxBytes:number;formats:Record<string,string>;example:string;template?:string;guide:string}>;
+export const bundleSchema: z.ZodType<any>, reportSchema: z.ZodType<any>, artifactSchema: z.ZodType<any>, nativeResultSchema: z.ZodType<any>, failureDetailsSchema: z.ZodType<any>;
+export function validateNativeResult(value:unknown,expectedSeed?:string):any;
+export function canonicalJson(value:unknown):string;
+export function sha256(value:string|Uint8Array):string;
+export function normalizeBundle(input:unknown):any;
+export function bundleIdentity(input:unknown):{manifest:any;bundleHash:string;canonicalBytes:string};
+export function identifyArtifact(role:string,name:string):{rule:typeof artifactRules[number];encoding:string};
+export function validateArtifactBytes(role:string,encoding:string,bytes:Buffer):any;
+export function bindReport(report:unknown,manifest:any):any;
+export function submissionSpec():any;
