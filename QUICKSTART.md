@@ -1,76 +1,72 @@
-# Start a circuit study · kit 0.10.4
+# Start a circuit study · GitHub kit 0.10.5
 
-Clone this repository or extract the versioned framework ZIP. The source tree and framework ZIP contain the CLI and verifier source, but not the frozen Genesis circuit. A `circuits:read` API key can pull Genesis once. The complete Release ZIP includes Genesis as another option; verify its SHA-256 against `SHA256SUMS.txt`. Use Node.js 24.15–24.x and Rust 1.93.0. Keep the API key and local sampling contexts out of Git.
+Clone this repository, use Node.js 24.15–24.x and Rust 1.93.0, and keep the API key outside Git. The repository contains the client and verifier source; the first approved parent is downloaded once. The complete 0.10.4 Release archive remains an older distribution. Clone the current repository for the compact-only submission guard.
 
-## 1. Prepare the project
+## 1. Get a parent and task manifest
 
-Before running any API command against the current test server, set `QCAT_API_URL` to `https://dev.qcat.io/api/v1`. In a Unix shell, run `export QCAT_API_URL=https://dev.qcat.io/api/v1`. The CLI default `http://localhost:3000/api/v1` works only against a local Quantum Cat server. The `task-manifest` command below is an API command, even though it does not need a key.
-
-From the repository or extracted `qcat-research-kit` directory:
+Create an account and a key with `circuits:read`, `submissions:write` and `submissions:read` at [dev.qcat.io](https://dev.qcat.io/). Set `QCAT_API_URL=https://dev.qcat.io/api/v1` and supply `QCAT_API_KEY` through your local secret facility. Then:
 
 ```sh
 npm ci
-node bin/qcat.mjs init ../my-study
-node bin/qcat.mjs task-manifest ../my-study/task-manifest.json
+node bin/qcat.mjs task-manifest ../task-manifest.json
+node bin/qcat.mjs list-verified ecc-point-addition
 ```
 
-`task-manifest` downloads and checks the current `ecc-random-v2` definition without a key. If this is a repository clone or framework ZIP, set a `circuits:read` API key and run `node bin/qcat.mjs pull-genesis ../genesis`, then `node bin/qcat.mjs import-baseline ../my-study ../genesis/ops.bin`. The one-time Genesis transfer is about 105 MB. The complete ZIP imports its bundled Genesis automatically at `init`. No patch can be reconstructed without its exact parent circuit.
+If a qualified result is listed, start from the current best or a specific verified ID:
 
-To continue an already qualified public result, run `node bin/qcat.mjs pull VERIFIED_ID ../verified-parent`, then `node bin/qcat.mjs init ../my-study --baseline ../verified-parent/ops.bin`. The matching `verified-manifest.json` pins its ID and SHA-256. `pull-best` can replace `pull VERIFIED_ID` when a qualified result exists. Today the public library is empty; archived Genesis is the available starting point.
+```sh
+node bin/qcat.mjs pull-best ../parent
+node bin/qcat.mjs init ../my-study --baseline ../parent/ops.bin
+```
 
-## 2. Edit and build
+If the qualified catalog is empty, use archived Genesis:
 
-Record your hypothesis in `../my-study/experiments/`. Edit `../my-study/src/optimize.mjs`, then:
+```sh
+node bin/qcat.mjs pull-genesis ../genesis
+node bin/qcat.mjs init ../my-study --baseline ../genesis/ops.bin
+```
+
+Keep the downloaded `verified-manifest.json` or `reference-manifest.json` beside the parent. The first parent may be about 100 MB. Subsequent qualified patch downloads use the locally cached parent when possible. The CLI checks the exact parent and circuit hashes; unqualified private records are not valid public parents.
+
+## 2. Make one bounded optimization
+
+Read the generated study's `AGENTS.md` and `RESEARCH.md`. Record the hypothesis, source revision and parameters under `experiments/`, then edit `src/optimize.mjs`. Do not change the task, verifier, input selection or sampling context.
 
 ```sh
 node bin/qcat.mjs build ../my-study
+```
+
+The builder creates a full `ops.bin` **locally** for evaluation. Inspect `../my-study/build-receipt.json`: `delivery.mode` must be `qcat-delta-v1`, with a patch at `../my-study/ops.qdelta` no larger than 16 MiB. If it says `full_circuit`, read `delivery.deltaRejection`, document it, and rebuild from a closer publicly verified parent or with a smaller incremental edit. The GitHub client will stop at `check` and `submit` rather than upload the full circuit. Do not rename `ops.bin` or alter parent hashes manually.
+
+Complete the method and research report, then package the source:
+
+```sh
 node bin/qcat.mjs pack-source ../my-study
 ```
 
-The build always creates a full local `ops.bin`. When the exact parent and output can be reconstructed, it also creates `ops.qdelta` and selects that small file in `qcat.project.json`. Inspect `build-receipt.json` and `delivery.mode`. A smaller operation count alone does not establish correctness or a lower resource score.
+## 3. Run the complete local precheck
 
-## 3. Run the local precheck
-
-Build the bundled verifier source once:
+Build the bundled verifier once and run the pinned 10,048-input check on the local full circuit:
 
 ```sh
 rustup toolchain install 1.93.0
 cargo +1.93.0 build --locked --manifest-path verifier/Cargo.toml --release --bin qcat-server-eval
-```
-
-Run the pinned 10,048-input check:
-
-```sh
 node bin/qcat.mjs record ../my-study \
-  --verifier /absolute/path/to/qcat-research-kit/verifier/target/release/qcat-server-eval \
+  --verifier /absolute/path/to/verifier/target/release/qcat-server-eval \
   --verifier-version qcat-ecc-random-v2 \
-  --manifest ../my-study/task-manifest.json
+  --manifest ../task-manifest.json
 ```
 
-The command creates the required `run-report.json` and `run.log`. It freezes the sampling context for this circuit and policy in `.qcat-run-contexts/`. Preserve that directory across legitimate retries. Do not choose or rotate inputs to obtain a pass. When independent precheck is enabled, the server later performs its own check. Inspect the [live verification capability](https://dev.qcat.io/api/v1/research/verification) before submitting; `enabled: false` means a private development upload will not start a server precheck job.
+`record` creates `run-report.json` and `run.log`; it also retains the per-circuit sampling context in `.qcat-run-contexts/`. Keep that context across legitimate retries. Never choose inputs or rotate a context to obtain a pass. The server later executes an independent check on its reconstructed circuit.
 
-## 4. Complete and submit the record
+## 4. Check and submit the small package
 
-Fill in `qcat.project.json`, `method.md` and `research-report.md`, including sources, reuse rights, exact AI model names and versions (or an explicit no-AI declaration), reproduction steps and limitations. Then:
+Complete `qcat.project.json`, including title, summary, provenance, sharing choice and exact AI model/version declaration (or explicit no-AI use). Check that the measured result supports the claim, then:
 
 ```sh
 node bin/qcat.mjs check ../my-study
-```
-
-Create an account and a scoped API key on the research platform. Set `QCAT_API_URL=https://dev.qcat.io/api/v1` for the test server (local development defaults to `http://localhost:3000/api/v1`). Set `QCAT_API_KEY` in your shell, never in a project file. `submissions:write` is needed to submit; `submissions:read` reads private results; `circuits:read` browses and pulls circuits.
-
-```sh
 node bin/qcat.mjs submit ../my-study --development
 node bin/qcat.mjs status SUBMISSION_UUID
-node bin/qcat.mjs download SUBMISSION_UUID ../saved-record
 ```
 
-The current intake creates a **private development** record. A completed author report and a server precheck do not make the circuit publicly qualified or eligible for chain registration. If the connection drops, retry the same unchanged project: `.qcat-upload-state.json` keeps upload IDs and a retry key but never stores the API key.
-
-## Transfer sizes
-
-The recorded Genesis-based experiment uploaded a 248,605-byte `ops.qdelta` rather than its approximately 96 MB compiled circuit. It still uploaded the required parameters, method, research report, runtime report and log, plus a small optional source ZIP. A fundamentally different circuit or an unsuccessful delta reconstruction requires a full circuit file. Verified public results with patches download their patch chain and reconstruct locally; an already cached immediate parent lets `pull` fetch only the newest patch. See [API.md](API.md) for endpoints and [README.md](README.md) for rules and limits.
-
-## Download options
-
-The complete kit is available through the account-protected Genesis card on the research platform. The framework ZIP contains the same client and verifier source without the Genesis binary. The versioned GitHub Release, when available, carries both ZIPs and `SHA256SUMS.txt`; check the downloaded file before use. See [DISTRIBUTION.md](DISTRIBUTION.md), [LLM_WORKFLOW.md](LLM_WORKFLOW.md) and [PUBLIC_POLICY.md](PUBLIC_POLICY.md).
+Only `ops.qdelta` and the required small records are transferred; `ops.bin` and the parent stay local. The server reconstructs and fingerprints the full circuit before independent precheck. An interrupted upload can resume with `.qcat-upload-state.json` for the unchanged package; it never contains the API key. A local or server precheck is not public qualification, chain registration or reward payment. See [API.md](API.md) and [PUBLIC_POLICY.md](PUBLIC_POLICY.md).

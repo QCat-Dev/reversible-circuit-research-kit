@@ -1,8 +1,8 @@
 # Point-addition research task
 
-Improve the **point-addition circuit** while preserving its computation on the current published task. The published circuit format is QECCOPSZ. A candidate is a locally compiled `ops.bin`, its build parameters, method, research report, and a completed machine-readable runtime report. When the circuit can be reconstructed from a pinned parent, submit the compact `ops.qdelta` instead of transferring `ops.bin`.
+Improve the **point-addition circuit** while preserving its computation on the current published task. The published circuit format is QECCOPSZ. A candidate is a locally compiled `ops.bin`, its build parameters, method, research report, and a completed machine-readable runtime report. The full `ops.bin` is for local evaluation only. This GitHub client submits the compact, hash-bound `ops.qdelta` plus the required reports and source archive; it refuses a full-circuit upload. If no compact patch is produced, record why and use a closer publicly verified parent or a smaller incremental change.
 
-The editable lane is `src/optimize.mjs`. The starter pass cancels two adjacent identical self-inverse gates. The builder streams the baseline gate records through this pass. You may develop stronger passes, but each claim needs a stated correctness argument and a real evaluator run. You may instead build a complete circuit in your own source tree and import its `ops.bin` as a new baseline. The baseline must be a lawful, provenance-tracked artifact. The complete kit includes the frozen team Genesis baseline; the small framework ZIP omits it. No external repository source is redistributed.
+The editable lane is `src/optimize.mjs`. The starter pass cancels two adjacent identical self-inverse gates. The builder streams the baseline gate records through this pass. You may develop stronger passes, but each claim needs a stated correctness argument and a real evaluator run. You may build a complete circuit in your own source tree for local study, but the GitHub submission flow still requires a reconstructible patch from an approved parent. The baseline must be a lawful, provenance-tracked artifact. The complete kit includes the frozen team Genesis baseline; the small framework ZIP omits it. No external repository source is redistributed.
 
 ## Start from team references or qualified community work
 
@@ -30,7 +30,7 @@ node /path/to/qcat-research-kit/bin/qcat.mjs pull-best ../verified-best
 node /path/to/qcat-research-kit/bin/qcat.mjs pull VERIFIED_ID ../verified-older
 ```
 
-Each qualified list page contains at most 20 summaries and no circuit bytes. To continue from a pulled qualified version, run `init next-attempt --baseline ../verified-best/ops.bin`; the matching `verified-manifest.json` pins its ID and hash so the next build can generate a small delta. `QCAT_BASELINE_PATH` may point to an already cached immediate parent when pulling a later version. The community library remains empty until a submission passes its own platform and public qualification gates. Do not describe a team reference as a qualified community submission.
+Each qualified list page contains at most 20 summaries and no circuit bytes. To continue from a pulled qualified version, run `init next-attempt --baseline ../verified-best/ops.bin`; the matching `verified-manifest.json` pins its ID and hash so the next build can generate a small delta. `QCAT_BASELINE_PATH` may point to an already cached immediate parent when pulling a later version. The community library changes as submissions qualify; inspect its live result rather than assuming it is empty. Do not describe a team reference as a qualified community submission.
 
 For private status/download, use `submissions:read`. To submit a new package, use `submissions:write`. Keep keys outside this project and its ZIP. A changed candidate needs its own complete local report and independent server check.
 
@@ -38,9 +38,9 @@ For private status/download, use `submissions:read`. To submit a new package, us
 
 1. Record the hypothesis, source revision, baseline hash and intended change under `experiments/`.
 2. Build with `node /path/to/qcat-research-kit/bin/qcat.mjs build .` from the project directory.
-3. Review `build-receipt.json`: operation counts and hashes are build facts, **not** correctness or a score.
+3. Review `build-receipt.json`: `delivery.mode` must be `qcat-delta-v1` before continuing toward a GitHub-client submission. If it is `full_circuit`, record `deltaRejection`, choose a closer approved parent or a smaller edit, and rebuild. Operation counts and hashes are build facts, **not** correctness or a score.
 4. Fetch the task manifest with `task-manifest my-attempt/task-manifest.json`; build the pinned verifier from the kit source, then run `record` with those exact files. This executes 10,048 random inputs. Do not choose inputs, seeds, or retry contexts for a better outcome.
-5. Complete `method.md`, `research-report.md` and `qcat.project.json`. Run `check`, then use the website or `submit --development` for private receipt. The server executes a separate precheck.
+5. Complete `method.md`, `research-report.md` and `qcat.project.json`. Run `check`, then use `submit --development` for a private receipt. The server executes a separate precheck.
 
 Keep every attempt, including failures, with its source hash, exact parameters, build receipt, report/log paths, error counts, Q/cost figures if available and conclusion. Archive previous output files before rebuilding. Keep `.qcat-run-contexts` in place. The platform precheck uses 10,048 random inputs; results from another benchmark do not substitute for this run.
 

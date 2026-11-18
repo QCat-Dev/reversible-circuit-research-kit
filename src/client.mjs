@@ -34,6 +34,9 @@ async function importBundledGenesis(folder,path){
 export async function prepare(folder){
   const root=await realpath(folder),project=JSON.parse(await readFile(join(root,'qcat.project.json'),'utf8'));
   if(!Array.isArray(project.artifacts)||project.artifacts.length>10)throw new Error('List at most ten materials in qcat.project.json.');
+  const circuit=project.artifacts.find(item=>item.role==='circuit');
+  if(!circuit||identifyArtifact(circuit.role,circuit.filename).encoding!=='qcat-delta-v1')
+    throw new Error('Compact circuit upload required: this GitHub kit submits ops.qdelta only. Keep ops.bin for local verification. Start from a pinned Genesis or publicly verified parent, make a smaller incremental change, rebuild, and confirm build-receipt.json delivery.mode is qcat-delta-v1 before check or submit.');
   const files=[];
   for(const item of project.artifacts){
     const {rule,encoding}=identifyArtifact(item.role,item.filename),path=join(root,item.filename);

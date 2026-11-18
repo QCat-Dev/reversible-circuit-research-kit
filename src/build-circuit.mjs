@@ -113,7 +113,7 @@ export async function buildCircuit(folder){
     await rename(temporary,output);
     const circuitHash=digest(await readFile(output)),outputBytes=(await stat(output)).size;
     const projectPath=join(root,'qcat.project.json'),project=JSON.parse(await readFile(projectPath,'utf8'));
-    let delivery={mode:'full_circuit',bytes:outputBytes};
+    let delivery={mode:'full_circuit',bytes:outputBytes,deltaRejection:'No pinned parent circuit matches the local baseline.'};
     if(project.parentCircuitId&&project.parentCircuitSha256===baselineHash){
       const delta=recorder.finish({parentSha256:baselineHash,circuitSha256:circuitHash,parentOperations:inputCount,outputOperations:outputCount,circuitBytes:outputBytes});
       if(delta&&delta.length<outputBytes/2){
@@ -126,7 +126,7 @@ export async function buildCircuit(folder){
           const circuit=project.artifacts.find(item=>item.role==='circuit');
           if(circuit)circuit.filename='ops.qdelta';
         }catch(error){await rm(join(root,'ops.qdelta'),{force:true});delivery={mode:'full_circuit',bytes:outputBytes,deltaRejection:(error).message};}
-      }
+      }else delivery={mode:'full_circuit',bytes:outputBytes,deltaRejection:delta?'Delta was not smaller than half the compiled circuit.':'Delta exceeded the 16 MiB patch limit or command limit.'};
     }
     if(delivery.mode==='full_circuit'){
       delete project.compiledCircuitSha256;delete project.compiledCircuitSizeBytes;
