@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { createHash } from 'node:crypto';
 import {inspectDelta,MAX_DELTA_BYTES} from './delta.mjs';
-export const KIT_VERSION = '0.10.4';
+export const KIT_VERSION = '0.10.5';
 export const BUNDLE_VERSION = 'qcat-research-bundle-v1';
 export const TASK_VERSION = 'ecc-random-v2';
 export const SAMPLING_POLICY = 'qcat-ecc-random-10048-v1';
@@ -33,7 +33,7 @@ export const bundleSchema=z.object({
   parentCircuitId:z.string().regex(/^(?:[A-Za-z0-9-]{3,80}|[a-f0-9-]{36})$/).optional(),parentCircuitSha256:hex.optional(),
   compiledCircuitSha256:hex.optional(),compiledCircuitSizeBytes:z.number().int().min(17).max(134217728).optional(),
   provenance:z.object({license:txt(2,120),credits:txt(10,2000),links:z.array(z.string().url().max(600).regex(/^https:\/\//)).max(6)}).strict(),
-  sharing:z.enum(['private_review','publish_after_qualification']),
+  sharing:z.literal('public'),
   artifacts:z.array(artifactSchema).min(6).max(10),
 }).strict().superRefine((value,ctx)=>{
   const issue=(path,message)=>ctx.addIssue({code:'custom',path,message});

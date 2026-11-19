@@ -1,16 +1,16 @@
-# Reversible Circuit Research Kit — GitHub 0.10.5
+# Reversible Circuit Research Kit — 0.10.5
 
 Create an editable research project, build a candidate QECCOPSZ circuit, run the **10,048-random-input local precheck**, and submit the same materials accepted by the research platform. The current task version is `ecc-random-v2`; completed reports use `qcat-run-report-v2`.
 
-A local report remains author-provided evidence. When independent precheck is enabled, the server generates its own sampling context, executes the circuit and saves a separate report. Passing these prechecks does not establish public qualification, chain registration or a reward entitlement. Check the [live verification capability](https://dev.qcat.io/api/v1/research/verification) before submitting: if `enabled` is `false`, an accepted private development record has no server precheck job yet.
+A local report remains author-provided evidence. When independent precheck is enabled, the server generates its own sampling context, executes the circuit and saves a separate report. Passing these prechecks does not establish public qualification, chain registration or a reward entitlement. Check the [live verification capability](https://dev.qcat.io/api/v1/research/verification) before submitting: if `enabled` is `false`, an accepted public research package has no server precheck job yet.
 
-Start with [LLM_WORKFLOW.md](LLM_WORKFLOW.md) if you are giving this repository and an API key to a coding assistant. [QUICKSTART.md](QUICKSTART.md) gives the commands, [API.md](API.md) defines the HTTP interface, and [DISTRIBUTION.md](DISTRIBUTION.md) describes archive integrity. Submissions enter a private precheck first. Public qualification is a separate later stage; inspect live status instead of treating a receipt as qualification.
+Start with [LLM_WORKFLOW.md](LLM_WORKFLOW.md) if you are giving this repository and an API key to a coding assistant. [QUICKSTART.md](QUICKSTART.md) gives the commands, [API.md](API.md) defines the HTTP interface, and [DISTRIBUTION.md](DISTRIBUTION.md) describes archive integrity. Every new package is a public research submission intended for release if it qualifies. The qualified-circuit catalog remains a separate, later gate.
 
 ## Start from this repository
 
 Clone this repository and install its locked Node.js dependencies. Create an account at the [research platform](https://dev.qcat.io/), then create a scoped API key with `circuits:read`, `submissions:write` and `submissions:read`. Give a coding assistant the repository URL, the API base `https://dev.qcat.io/api/v1`, and the key through its secret or environment facility. The key must stay out of source, reports, logs, prompts copied into the repository and commits. Follow the exact agent sequence in [LLM_WORKFLOW.md](LLM_WORKFLOW.md): inspect the task, list references and qualified summaries, pull one baseline by ID, build, run the complete local report, check and submit. The repository does not contain the Genesis binary; `pull-genesis` retrieves it once with `circuits:read`.
 
-The first-100 improvement cap and million-input public verification gate are explained in [PUBLIC_POLICY.md](PUBLIC_POLICY.md). The server checks the measured score after independent precheck and again during qualification. The GitHub client also requires a compact circuit patch before it will submit.
+The proposed first-100 improvement cap is explained in [PUBLIC_POLICY.md](PUBLIC_POLICY.md). It is a planned public-admission rule, not a limit enforced by submission intake alone.
 
 ## Browse verified circuits without downloading them all
 
@@ -23,13 +23,13 @@ node bin/qcat.mjs pull-best ../current-best
 node bin/qcat.mjs pull VERIFIED_CIRCUIT_ID ../one-verified-circuit
 ```
 
-The public list returns at most 20 small summaries per page: identity, author display name, task version, verified score, file sizes and SHA-256 digests. It includes **no circuit bytes**. `list-verified` sorts by lowest score; `history-verified` shows newest submissions first. `pull-best` selects the lowest-score verified circuit, while `pull` selects an exact historical ID. For a qualified result submitted as a compact patch, `pull` fetches that small patch (and any verified parent patches), reconstructs the full circuit locally from the Genesis asset in the complete kit or a matching local parent supplied through `QCAT_BASELINE_PATH`, and verifies every hash. When that path already matches the immediate parent, only the newest patch is fetched. It also downloads the source archive. An older qualified result may still download as a full circuit if it was originally stored that way; new submissions through this GitHub client require a compact patch. Arbitrary new circuits cannot be guaranteed to fit that limit. The one-time complete Genesis kit is about 105.6 MB, while the tested patch was 248,605 bytes. The original full circuit is still stored server-side for independent verification. Catalog, best selector, record manifest and each circuit/source download require an account API key with `circuits:read`. To continue research, use `init ../next-project --baseline ../one-verified-circuit/ops.bin`; the downloaded `verified-manifest.json` pins the public parent ID and hash so future builds can emit compact patches. Private past submissions still use the authenticated `download` command. Only qualified, published records are pullable; an author local report or server precheck alone is not a Verified result. Check the live catalog rather than assuming it is empty.
+The public list returns at most 20 small summaries per page: identity, author display name, task version, verified score, file sizes and SHA-256 digests. It includes **no circuit bytes**. `list-verified` sorts by lowest score; `history-verified` shows newest submissions first. `pull-best` selects the lowest-score verified circuit, while `pull` selects an exact historical ID. For a qualified result submitted as a compact patch, `pull` fetches that small patch (and any verified parent patches), reconstructs the full circuit locally from the Genesis asset in the complete kit or a matching local parent supplied through `QCAT_BASELINE_PATH`, and verifies every hash. When that path already matches the immediate parent, only the newest patch is fetched. It also downloads the source archive. Older qualified records may still require their compatible full-circuit download, but this 0.10.5 GitHub client creates only compact new submissions. The one-time complete Genesis kit is about 105.6 MB, while the tested patch was 248,605 bytes. The server reconstructs the full circuit for independent verification. Catalog, best selector, record manifest and each circuit/source download require an account API key with `circuits:read`. To continue research, use `init ../next-project --baseline ../one-verified-circuit/ops.bin`; the downloaded `verified-manifest.json` pins the public parent ID and hash so future builds can emit compact patches. Owner history and original submitted files use the authenticated `download` command. Nothing is publicly pullable until the complete public-verification, material-review and author-publication gates are met; an author local report or server precheck alone is not a Verified result.
 
 ## Required materials
 
 | Material | File | What belongs here |
 | --- | --- | --- |
-| Circuit patch | `ops.qdelta` | The compact, hash-bound QCATDLT1 patch against a pinned approved parent (up to 16 MiB). The full `ops.bin` stays local for evaluation; the server reconstructs and verifies it before scientific checks. |
+| Circuit patch | `ops.qdelta` | The compact, hash-bound QCATDLT1 patch against a pinned approved parent, up to 16 MiB. The full QECCOPSZ `ops.bin` stays local; the server reconstructs and verifies it before scientific checks. |
 | Circuit parameters | `parameters.json` | Exact build and algorithm parameters, up to 1 MiB. Use `{}` only if the circuit has no configurable parameters. |
 | Method and reproduction | `method.md` | Changes, rationale, build commands, dependencies and environment versions, up to 2 MiB. |
 | Research report | `research-report.md` or PDF | Results, resource analysis, limitations and citations, up to 16 MiB. |
@@ -38,7 +38,7 @@ The public list returns at most 20 small summaries per page: identity, author di
 
 Optional: one source ZIP up to 64 MiB and up to three supporting Markdown/PDF/JSON files, each up to 16 MiB. Maximum ten artifacts and 256 MiB per package. The website stores source archives; it does not automatically build or run them.
 
-The project also requires a title, summary, sources/credits, license, sharing choice and AI declaration. List each model's name, exact version/release and purpose, or explicitly declare `usage: "none"` with an empty models array. Model weights are not required. Exclude credentials, API keys, wallet secrets and private personal information.
+The project also requires a title, summary, sources/credits, license, public sharing declaration and AI declaration. `sharing` is fixed to `public`; there is no private submission lane. List each model's name, exact version/release and purpose, or explicitly declare `usage: "none"` with an empty models array. Model weights are not required. Exclude credentials, API keys, wallet secrets, confidential research, private personal information and material you cannot publicly license.
 
 ## Prepare the folder and verifier
 
@@ -57,7 +57,7 @@ node bin/qcat.mjs build ../my-research
 node bin/qcat.mjs pack-source ../my-research
 ```
 
-The starter optimization pass cancels adjacent byte-identical self-inverse gates. Researchers and LLMs can change that pass, document a hypothesis and rerun the build. `build-receipt.json` records source and circuit hashes plus operation counts. It is a build receipt, **not** proof that the result computes the task or improves its measured score. The builder streams records, checks the declared count and limits, and writes `ops.bin` and build provenance into `parameters.json`. With a pinned parent, it also writes `ops.qdelta` when reconstruction produces byte-identical `ops.bin` and the patch is less than half its size. The submission manifest then selects the patch; the local evaluator still runs the full compiled file. If delta reconstruction fails, is too large, or is not worthwhile, the build receipt records `delivery.mode: "full_circuit"` and `deltaRejection`; `check` and `submit` stop. Use a closer publicly verified parent or a smaller incremental edit. Never rename the full file as a patch. `pack-source` creates an optional `source.zip` with the editable source and provenance and adds it to the submission manifest. The source ZIP excludes the baseline binary; the complete starter archive includes it once for local reuse. The builder refuses to overwrite a previous candidate, report or log; archive previous outputs first, keeping `.qcat-run-contexts`.
+The starter optimization pass cancels adjacent byte-identical self-inverse gates. Researchers and LLMs can change that pass, document a hypothesis and rerun the build. `build-receipt.json` records source and circuit hashes plus operation counts. It is a build receipt, **not** proof that the result computes the task or improves its measured score. The builder streams records, checks the declared count and limits, and writes local `ops.bin` plus build provenance into `parameters.json`. With a pinned parent, it also writes `ops.qdelta` when reconstruction produces byte-identical `ops.bin` and the patch is less than half its size. The submission manifest then selects the patch; the local evaluator still runs the full compiled file. If delta reconstruction fails, exceeds limits or is not worthwhile, the receipt records `delivery.mode: "full_circuit"` with `deltaRejection`; `check` and `submit` stop. Use a closer publicly verified parent or a smaller incremental edit. Never rename the full file as a patch. `pack-source` creates an optional `source.zip` with the editable source and provenance and adds it to the submission manifest. The source ZIP excludes the baseline binary; the complete starter archive includes it once for local reuse. The builder refuses to overwrite a previous candidate, report or log; archive previous outputs first, keeping `.qcat-run-contexts`.
 
 The Genesis asset is a frozen reference with its own provenance and hash. Record the baseline origin, exact source revision, build command and reuse rights in `method.md` and the project provenance fields. Results from a different benchmark do not substitute for this task's local report or server evidence.
 
@@ -106,13 +106,15 @@ node bin/qcat.mjs check ../my-research
 
 This creates the canonical `qcat.submission.json`. Its package hash covers UTF-8 JSON with sorted object keys and artifacts ordered by role/filename (`qcat-sorted-json-v1`). Package, circuit and eventual contract proof hashes are different identities.
 
-Create a Quantum Cat API key with `circuits:read` for catalog/download, `submissions:write` for submission and `submissions:read` for private records. Set `QCAT_API_KEY` only in the local environment. Set `QCAT_API_URL=https://dev.qcat.io/api/v1` for the test server, or use the default `http://localhost:3000/api/v1` during local development.
+Create a Quantum Cat API key with `circuits:read` for catalog/download, `submissions:write` for submission and `submissions:read` for owner evidence and history. Set `QCAT_API_KEY` only in the local environment. Set `QCAT_API_URL=https://dev.qcat.io/api/v1` for the test server, or use the default `http://localhost:3000/api/v1` during local development.
 
 ```sh
 node bin/qcat.mjs submit ../my-research --development
 node bin/qcat.mjs status SUBMISSION_UUID
 node bin/qcat.mjs download SUBMISSION_UUID ../downloaded-research
 ```
+
+`submit --development` confirms both that the receipt is not yet scientific qualification or a reward entitlement and that the package is a public research submission. The client sends `acknowledgeDevelopment: true` and `acknowledgePublicSubmission: true`; it does not offer a private sharing mode. Review the package before submitting and do not include confidential or unlicensed material.
 
 The website is an alternative: import `qcat.project.json` or `qcat.submission.json` first so a compact patch retains its pinned parent and compiled hash, then select the same six materials, complete the same declarations, review and submit. File selection alone does not upload anything. Both paths reject missing or incomplete reports and use the same protocol. Historical submissions remain readable; new submissions must use the current task/report version.
 
@@ -126,7 +128,7 @@ When enabled, a complete submission creates a durable verification job. The serv
 
 `POST /api/v1/submissions/:id/verification` with `{}` starts an eligible record or requests a permitted infrastructure retry. It requires `submissions:write`, or a valid cookie session with Origin/CSRF checks. It accepts no input, seed, verifier or score override. A scientific failure is not automatically retried with another sample. Server evidence remains separate from the unchanged author report.
 
-A successful server precheck is private preliminary acceptance. Public verification, score admission, operational review, chain registration and rewards have their own prerequisites; a local or server precheck is not a public scientific sample count.
+A successful server precheck is preliminary owner/reviewer evidence. Public verification, score admission, operational review, chain registration and rewards have their own prerequisites; a local or server precheck is not a public scientific sample count.
 
 ## API and contract boundary
 
@@ -134,7 +136,7 @@ A successful server precheck is private preliminary acceptance. Public verificat
 2. `GET /challenges` and `GET /challenges/:id/versions/:version` identify the pinned task and manifest.
 3. `POST /research/preflight` checks `{manifest,runtimeReport}` before storing files.
 4. Declare each artifact with `POST /research/uploads`, then stream its exact bytes to the returned content endpoint as `application/octet-stream`.
-5. `POST /submissions` freezes the package with a UUID `Idempotency-Key`, the manifest, `{filename,uploadId}` entries and development acknowledgement. An optional owner-held `previousSubmissionId` links a revision.
+5. `POST /submissions` freezes the package with a UUID `Idempotency-Key`, the manifest, `{filename,uploadId}` entries, `acknowledgeDevelopment: true` and `acknowledgePublicSubmission: true`. An optional owner-held `previousSubmissionId` links a revision.
 6. Owner history, evidence, manifests and original files remain available under `/me/submissions` and `/submissions/:id/...`.
 
 The JSON Schema covers structural rules; shared JavaScript also enforces cross-field counts, hashes, costs and file requirements. Cookie writes require Origin and CSRF. Scoped bearer keys do not need cookie CSRF.
@@ -147,4 +149,4 @@ A repository clone or framework ZIP requires an authenticated `pull-genesis` or 
 
 The [MIT license](LICENSE) covers Quantum Cat-authored framework code and documentation. The Genesis reference and `verifier/` are excluded from that MIT grant; read [LICENSE-SCOPE.md](LICENSE-SCOPE.md) and `verifier/NOTICE` for their provenance and terms. The frozen verifier policy files include historical release-audit statements; use current submission and server evidence for the status of a particular circuit.
 
-Do not commit credentials, upload state, local sampling contexts, personal submissions, `target/`, `node_modules/` or generated runtime outputs. No scientific input corpus or compiled evaluator binary is bundled. Submission intake is an owner-visible precheck stage; public qualification, chain registration and rewards require their own evidence and live prerequisites.
+Do not commit credentials, upload state, local sampling contexts, personal submissions, `target/`, `node_modules/` or generated runtime outputs. No scientific input corpus or compiled evaluator binary is bundled. New submission intake is public by design; qualification, catalog publication, chain registration and rewards remain separate gates.

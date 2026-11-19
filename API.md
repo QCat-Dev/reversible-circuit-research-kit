@@ -1,12 +1,12 @@
-# Research interface — GitHub kit 0.10.5
+# Research interface — kit 0.10.5
 
-Research API base URL: `https://dev.qcat.io/api/v1`. For local development, use `http://localhost:3000/api/v1`. The base URL is a prefix, not a standalone page; a public example is [the current submission specification](https://dev.qcat.io/api/v1/research/submission-spec). The shared schemas and rules are in `src/protocol.mjs`, `templates/submission.schema.json` and `templates/run-report.schema.json`. `GET /research/submission-spec` returns the current rules to a client. This document describes the implemented research interface. Private precheck, public qualification, chain proof registration and rewards are separate states.
+Research API base URL: `https://dev.qcat.io/api/v1`. For local development, use `http://localhost:3000/api/v1`. The base URL is a prefix, not a standalone page; a public example is [the current submission specification](https://dev.qcat.io/api/v1/research/submission-spec). The shared schemas and rules are in `src/protocol.mjs`, `templates/submission.schema.json` and `templates/run-report.schema.json`. `GET /research/submission-spec` returns the current rules to a client. This document describes the implemented research interface, not future public verification or chain operations.
 
 ## Authentication and data model
 
-Create an API key in the site's account page. Send `Authorization: Bearer <QCAT_API_KEY>`; never place it in `qcat.project.json`, a ZIP or a URL. Public task and leaderboard reads need no key. Circuit/reference catalog and downloads need `circuits:read`; private history and evidence need `submissions:read`; preflight, upload, submit and verification requests need `submissions:write`. Cookie requests from the website use Origin and CSRF checks instead.
+Create an API key in the site's account page. Send `Authorization: Bearer <QCAT_API_KEY>`; never place it in `qcat.project.json`, a ZIP or a URL. Public task and leaderboard reads need no key. Circuit/reference catalog and downloads need `circuits:read`; owner history and evidence need `submissions:read`; preflight, upload, submit and verification requests need `submissions:write`. Cookie requests from the website use Origin and CSRF checks instead.
 
-The current task ID is `ecc-point-addition`, task version `ecc-random-v2`. A research submission consists of an immutable manifest and six required artifacts: circuit patch (`ops.qdelta` through this GitHub client), `parameters.json`, `method.md`, `research-report.md` or PDF, completed `run-report.json`, and `run.log`. A source ZIP and up to three supporting files are optional for private intake; a reproducible source archive is required before public qualification. The complete starter kit includes Genesis once; the framework ZIP does not.
+The current task ID is `ecc-point-addition`, task version `ecc-random-v2`. A research submission is public by design and consists of an immutable manifest and six required artifacts: compact circuit patch (`ops.qdelta`), `parameters.json`, `method.md`, `research-report.md` or PDF, completed `run-report.json`, and `run.log`. This GitHub client keeps the reconstructed `ops.bin` local and rejects a package without a hash-bound patch. A source ZIP and up to three supporting files are optional at submission; reproducible source is required before qualification and catalog release. The complete starter kit includes Genesis once; the framework ZIP does not.
 
 ## Read and prepare
 
@@ -34,22 +34,22 @@ The current task ID is `ecc-point-addition`, task version `ecc-random-v2`. A res
 | `GET /verified-circuits/:id/files/source` | `circuits:read` | Reproducible `source.zip`. |
 | `GET /verified-circuits/:id/files/circuit` | `circuits:read` | Full `ops.bin` for older noncompact records only; compact records reject this route. |
 
-A compact manifest's relevant fields are `circuit:{sha256,sizeBytes}` for the reconstructed file, `transport:{encoding:"qcat-delta-v1",parentCircuitId,parentCircuitSha256,sha256,sizeBytes}` for the bytes on the wire, and `files:{delta,source}`. The CLI verifies each fetched patch, resolves its parent from the complete kit, `QCAT_BASELINE_PATH`, or earlier qualified patches, then checks the reconstructed full circuit against `circuit`. A missing or mismatched parent fails closed. The catalog changes when results qualify and are published. Check the live response; private precheck records never appear in it.
+A compact manifest's relevant fields are `circuit:{sha256,sizeBytes}` for the reconstructed file, `transport:{encoding:"qcat-delta-v1",parentCircuitId,parentCircuitSha256,sha256,sizeBytes}` for the bytes on the wire, and `files:{delta,source}`. The CLI verifies each fetched patch, resolves its parent from the complete kit, `QCAT_BASELINE_PATH`, or earlier qualified patches, then checks the reconstructed full circuit against `circuit`. A missing or mismatched parent fails closed. Inspect the live catalog rather than assuming that it is empty.
 
-## Private submission transaction
+## Public submission transaction
 
 The CLI implements the following ordered transaction; it preserves `.qcat-upload-state.json` for safe retries.
 
 | Step | Method and path | Key | Request and result |
 | --- | --- | --- | --- |
 | 1 | `POST /research/preflight` | `submissions:write` | JSON `{manifest,runtimeReport}`. Checks schema, report bindings and parent identity before upload. Returns the normalized `manifest`, `bundleHash`, `canonicalBytes`, `authorId` and `scientificStatus`. |
-| 2 | `POST /research/uploads` | `submissions:write` | Once per file: JSON `{taskVersion,artifactRole,filename,encoding,sizeBytes,sha256}`. Returns `{uploadId,contentPath,expiresAt}`. Circuit encoding is `qcat-delta-v1` for `.qdelta` or `qeccopsz` for `.bin`. |
+| 2 | `POST /research/uploads` | `submissions:write` | Once per file: JSON `{taskVersion,artifactRole,filename,encoding,sizeBytes,sha256}`. Returns `{uploadId,contentPath,expiresAt}`. This GitHub client declares the circuit as `qcat-delta-v1`; the backend retains `qeccopsz` compatibility for historical records. |
 | 3 | `POST /research/uploads/:uploadId/content` | `submissions:write` | Exact file bytes, `Content-Type: application/octet-stream`, no Content-Encoding. Returns `{uploadId,status:"ready",sha256}` after size, hash and file validation. |
-| 4 | `POST /submissions` | `submissions:write` | `Idempotency-Key: <uuid>` and JSON `{submissionFormat:"research-bundle-v1",manifest,uploads:[{filename,uploadId}],acknowledgeDevelopment:true}`; optional owned `previousSubmissionId`. Returns 202 with `{id,status,verification,duplicate,bundleHash}`. |
+| 4 | `POST /submissions` | `submissions:write` | `Idempotency-Key: <uuid>` and JSON `{submissionFormat:"research-bundle-v1",manifest,uploads:[{filename,uploadId}],acknowledgeDevelopment:true,acknowledgePublicSubmission:true}`; optional owned `previousSubmissionId`. Returns 202 with `{id,status,verification,duplicate,bundleHash}`. |
 
-The manifest is generated by `check <folder>` as `qcat.submission.json`. This GitHub client requires a small patch; it refuses a full-circuit upload. The backend retains compatibility with older full-circuit records. In a compact manifest, `compiledCircuitSha256` and `compiledCircuitSizeBytes` identify the complete circuit that the server must reconstruct. The server checks parent identity and reconstructed bytes before independent execution. A report or a score string alone is not accepted. Files are immutable after submission. Typical protocol limits: 16 MiB patch, 128 MiB legacy full circuit, 256 MiB total package, at most ten artifacts. This GitHub client submits only the patch. The other per-role limits and exact field schemas are returned by `/research/submission-spec`.
+The manifest is generated by `check <folder>` as `qcat.submission.json`. The command fails closed unless the circuit artifact is `ops.qdelta`; `compiledCircuitSha256` and `compiledCircuitSizeBytes` identify the complete local circuit that the server must reconstruct. The server checks the parent identity, patch and reconstructed bytes before independent execution. A report or score string alone is not accepted. Files are immutable after submission. The patch limit is 16 MiB; the backend's 128 MiB full-circuit limit exists for compatible historical records, not this GitHub client's submission path. A package is limited to 256 MiB and ten artifacts. The other per-role limits and exact schemas are returned by `/research/submission-spec`.
 
-## Private reads and independent precheck
+## Owner reads and independent precheck
 
 | Method and path | Key | Response or use |
 | --- | --- | --- |
@@ -64,11 +64,7 @@ The manifest is generated by `check <folder>` as `qcat.submission.json`. This Gi
 | `GET /submissions/:id/verification/:attemptId/log` | `submissions:read` | Exact server log bytes and SHA-256 header. |
 | `GET /challenges/ecc-point-addition/leaderboard?page=<n>` | None | Publicly qualified ranking, five rows per page. Empty until qualification. |
 
-When `GET /research/verification` reports `enabled: true`, server precheck executes its own 10,048 random inputs and keeps its context across infrastructure retries. When it reports `enabled: false`, a private development submission can still be stored, but no independent precheck job starts. `prechecked` is a private preliminary result; it is not public qualification, public verification work, a chain receipt or a reward. Private intake accepts an honest non-improvement; after precheck, only a server-measured score inside the current research improvement window may enter the public queue. The owner evidence response records the public queue status and reason.
-
-## Browser verification on dev
-
-`GET /research/public-participation` reports the live `mode`, active round, account eligibility, staking state, claimable work and blockers. Eligible verifiers use the [Verify page](https://dev.qcat.io/verify) to receive assigned 64-input work, download the lease-scoped circuit and inputs, run the computation and return a receipt. The server assigns inputs and checks independent receipts. Eligibility may depend on the live wallet and NFT stake state; use the current API response rather than an old test-mode assumption. The author cannot manufacture work orders or count a local precheck as public verification. Qualification and any on-chain reward depend on later reviewed stages.
+Server precheck executes its own 10,048 random inputs and keeps its context across infrastructure retries. `prechecked` is preliminary owner/reviewer evidence; it is not public qualification, public verification work, a chain receipt or a reward. A new package has no private publication option: its manifest must use `sharing: "public"`, and a qualifying circuit, source, reports, declared metadata, author identity and license may be released.
 
 ## Error and retry rules
 

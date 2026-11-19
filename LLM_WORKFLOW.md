@@ -1,46 +1,41 @@
-# Give this repository to a coding assistant
+# Work with a coding assistant
 
-The coding assistant can use this repository and a scoped account API key to download an approved parent, improve it locally, run the complete precheck and submit a small circuit patch. The full compiled circuit remains on the researcher's computer. The server reconstructs it from the parent and patch before its independent check.
+Give your coding assistant this repository URL, the API base `https://dev.qcat.io/api/v1`, and an account API key with `circuits:read`, `submissions:write` and `submissions:read`. Create an account on the [research platform](https://dev.qcat.io/) first. Enter the key through the assistant's secret or environment feature when available. The assistant may use it for API calls, but must not print it, place it in source, reports, logs or commits, or send it to any other service. A fresh scoped key can be revoked in the account page after the study.
 
-Use the API base `https://dev.qcat.io/api/v1`. Create the account and key at [dev.qcat.io](https://dev.qcat.io/); grant `circuits:read`, `submissions:write` and `submissions:read`. Give the key through the coding environment's secret or process environment facility. Keep it out of Git, source, reports, logs and shared prompts. Never paste it into a project file or URL.
+This repository is the framework. It has no Genesis binary. The assistant should clone the repository, inspect its rules, pull exactly one chosen baseline with the key, and work in a separate study directory. The one-time Genesis download is about 105 MB; qualified-circuit catalogs return small summaries, and individual compact records transfer as patches. This GitHub client rejects full-circuit submission: a candidate without a reconstructible compact patch must remain local until it is expressed as a smaller incremental change against an approved parent.
 
-## Instructions to give the assistant
+## Give the assistant this task
 
-> Clone `https://github.com/QCat-Dev/reversible-circuit-research-kit`, read `AGENTS.md`, `README.md`, `QUICKSTART.md`, `API.md` and `PUBLIC_POLICY.md`, and use `QCAT_API_URL=https://dev.qcat.io/api/v1` with my scoped API key held outside the repository. Install the locked dependencies and pinned verifier. Fetch the task manifest. List the publicly verified circuit summaries; if a qualified circuit exists, pull one by ID, preferably the current best. If the list is empty, pull archived Genesis once. Initialize a separate study from that exact downloaded parent and keep its manifest and SHA-256. Record the hypothesis and each attempt in `experiments/`. Change only the optimizer or independently licensed study source, not the verifier, task definition, inputs, sampling policy or checks. Build an incremental candidate. Confirm `build-receipt.json` says `delivery.mode: "qcat-delta-v1"`, the project selects `ops.qdelta`, and the patch is at most 16 MiB. Keep `ops.bin` local for the pinned 10,048-input run. If the build selects `full_circuit`, stop before submission, record `deltaRejection`, and try a closer publicly verified parent or a smaller change. Never upload `ops.bin` or manually rename it to `.qdelta`. Complete the method, research report, model/version declaration, runtime report, log and source ZIP. Run `check`, then `submit --development` only if the complete local result supports the claim. Return the submission ID, local/server check counts and measured Q/Toffoli score. A private receipt or precheck does not imply public qualification or a reward.
+> Clone the repository URL I supplied. Read `AGENTS.md`, `README.md`, `QUICKSTART.md`, `API.md` and `PUBLIC_POLICY.md`. Use the API base and scoped API key I supplied, without echoing or saving the key in the project. Set `QCAT_API_URL` and `QCAT_API_KEY` in the process environment. Install Node.js 24.15–24.x, Rust 1.93.0 and the locked Node dependencies. Download and check the task manifest. List references and qualified-circuit summaries, then choose either archived Genesis or one publicly qualified parent by ID. Download only that parent and verify its hash. Create a separate editable study with the pinned parent. Document each hypothesis, source revision, parameters and result in `experiments/`. Edit the study's circuit transformation source without changing the verifier, assertions, task manifest or sampling policy. Build an incremental candidate and require `build-receipt.json` to report `delivery.mode: "qcat-delta-v1"`; keep `ops.bin` local. If it reports `full_circuit`, stop, record `deltaRejection`, and use a closer parent or smaller edit. Package source, compile the bundled verifier, run the complete 10,048-input local check, and complete the parameters, method, research report, AI model/version declaration, runtime report and runtime log. Run `check`; submit the unchanged package with `submit --development` only after the local report is complete and after confirming that all submitted material may be publicly released. Report the submission ID, owner-visible server verification status, correctness counts and measured Q/Toffoli score. Do not claim public qualification from a submission receipt. Never choose inputs or rotate a sampling context to obtain a pass. Never upload `ops.bin`, rename it to `.qdelta`, or include confidential, personally sensitive or unlicensed material.
 
-## Command sequence
+## Exact command sequence
+
+From the repository root, after making the key available to the process:
 
 ```sh
 npm ci
 export QCAT_API_URL=https://dev.qcat.io/api/v1
-# Supply QCAT_API_KEY securely in this process; do not commit it.
 node bin/qcat.mjs task-manifest ../task-manifest.json
+node bin/qcat.mjs list-references
 node bin/qcat.mjs list-verified ecc-point-addition
 node bin/qcat.mjs history-verified ecc-point-addition
 ```
 
-The catalog returns up to 20 small summaries per page. Use its `nextCursor` to fetch another page; circuit bytes are downloaded one parent at a time. When a publicly qualified result is available:
-
-```sh
-node bin/qcat.mjs pull-best ../verified-parent
-node bin/qcat.mjs init ../my-study --baseline ../verified-parent/ops.bin
-```
-
-For a particular qualified version, use `pull VERIFIED_CIRCUIT_ID ../verified-parent`. If the qualified catalog is empty, use archived Genesis:
+Each catalog page has at most 20 summaries; pass its returned `nextCursor` as the last argument to fetch another page. These calls do not bulk-download circuits. To start from Genesis in this repository clone:
 
 ```sh
 node bin/qcat.mjs pull-genesis ../genesis
 node bin/qcat.mjs init ../my-study --baseline ../genesis/ops.bin
 ```
 
-The first complete parent download may be large; later patch transfers are small when the exact parent is cached. `pull` checks the parent chain and reconstructed circuit hashes. An unqualified private submission is not a valid transport parent.
+If a publicly qualified result is available, use `pull-best ../parent` or `pull VERIFIED_CIRCUIT_ID ../parent` instead, then `init ../my-study --baseline ../parent/ops.bin`. The CLI checks the parent and any compact patch chain. Inspect the live catalog rather than assuming it is populated; a submission receipt does not appear there until every qualification and publication gate is complete. Do not use `pull-best` as a fallback when it returns empty.
 
-After documenting a bounded source change:
+After editing `../my-study/src/optimize.mjs` and recording the hypothesis:
 
 ```sh
 node bin/qcat.mjs build ../my-study
-# Inspect ../my-study/build-receipt.json and require delivery.mode = qcat-delta-v1.
 node bin/qcat.mjs pack-source ../my-study
+rustup toolchain install 1.93.0
 cargo +1.93.0 build --locked --manifest-path verifier/Cargo.toml --release --bin qcat-server-eval
 node bin/qcat.mjs record ../my-study --verifier /absolute/path/to/verifier/target/release/qcat-server-eval --verifier-version qcat-ecc-random-v2 --manifest ../task-manifest.json
 node bin/qcat.mjs check ../my-study
@@ -48,4 +43,10 @@ node bin/qcat.mjs submit ../my-study --development
 node bin/qcat.mjs status SUBMISSION_UUID
 ```
 
-Use Node.js 24.15–24.x and Rust 1.93.0. The report must be the evaluator's actual completed report for this exact circuit and parameters. Preserve `.qcat-run-contexts` across retries. The kit refuses to `check` or `submit` a full circuit. `ops.qdelta`, `parameters.json`, `method.md`, `research-report.md`, `run-report.json` and `run.log` are mandatory; include `source.zip` for reproducibility and later public qualification. The server independently verifies the reconstructed circuit. Check [live verification availability](https://dev.qcat.io/api/v1/research/verification) and your owner-only status rather than assuming immediate public admission.
+Use the actual absolute verifier path for your checkout. `build` creates a full local circuit and, when exact reconstruction is possible, selects a smaller patch for transfer. `pack-source` attaches the editable source and provenance. `record` creates the mandatory `run-report.json` and `run.log` from a real execution. Complete `qcat.project.json`, `method.md` and `research-report.md` before `check`; the templates intentionally contain missing fields. The report must name every AI model and exact version used, or declare no AI use. When enabled, the server independently verifies the submitted circuit. Check [verification availability](https://dev.qcat.io/api/v1/research/verification) before submitting; a disabled precheck leaves the public research package without a server verification job. Owner status, evidence and original files are available through `status` and `download` with `submissions:read`.
+
+## Submission boundary
+
+Six artifacts are mandatory: compact `ops.qdelta`, `parameters.json`, `method.md`, `research-report.md` (or PDF), completed `run-report.json`, and `run.log`. Include `source.zip` through `pack-source`; it is optional at submission but required before qualification and catalog release. `check` fails unless the patch is bound to its exact parent and reconstructed circuit, then generates the manifest and verifies file hashes and report structure. The server reconstructs the full circuit, runs its own check and preserves an immutable record. Every new package has `sharing: "public"`; `submit` sends an explicit public-submission acknowledgement. See [API.md](API.md) for exact routes, scopes, sizes and retry behavior.
+
+The first-100 improvement cap described in [PUBLIC_POLICY.md](PUBLIC_POLICY.md) is a proposed rule for later public qualification. It is not enforced by `submit --development` alone; a public research submission does not advance that counter or appear on the public leaderboard until it qualifies. Inspect the live catalog before choosing between Genesis and a qualified parent.

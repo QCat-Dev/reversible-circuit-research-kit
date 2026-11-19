@@ -1,19 +1,15 @@
-# Public research progression on the development network
+# Public qualification policy status
 
-The research API accepts an immutable package and performs an independent 10,048-input server precheck. That is preliminary evidence. Public qualification requires a separate round of independent verification, review and the current score rule. Chain proof registration and reward claims are later stages; they must be checked separately on the live service.
+This page distinguishes public submission from public qualification. Every new package is submitted for public release if it qualifies; there is no private submission lane. The `submit --development` flag acknowledges that the submission is not yet a scientific qualification or reward entitlement.
 
-## Score rule
+## Proposed progression rule
 
-A candidate must have a lower server-measured score than the current qualified baseline. For the first 100 qualified improvements, the gain must also be no more than 0.1% of that baseline, calculated with exact integers: `(baselineScore - candidateScore) * 1000 <= baselineScore`. The baseline advances only after a public qualification; the server checks eligibility again when the public round settles. A submission outside that window may still have an owner-visible private precheck record, but it cannot enter or complete the public improvement queue under this rule.
+For the first 100 **qualified public improvements**, a candidate needs a score improvement greater than zero and no more than **0.1%** against the current qualified public benchmark, plus at least **1,000,000 independent public verification inputs**. From the 101st qualified improvement onward, qualification requires an improvement greater than zero and at least **10,000,000 independent public verification inputs**, without the 0.1% upper cap. The comparison is `(current qualified benchmark score - candidate score) / current qualified benchmark score`, calculated with exact integer arithmetic and checked again at the end of the public round. This is a qualification progression limit, not a limit on how much a researcher may improve before submission.
 
-The current baseline and completed advance count can change. Read the live queue, leaderboard and owner evidence instead of copying a score from this document. A previously submitted circuit, an archived reference and a publicly qualified circuit are different statuses.
+The current kit performs a **10,048-input local precheck** and the server performs its own separate **10,048-input precheck**. Passing either or both does not count toward the million-input public threshold. A public submission receipt is not a verified circuit, leaderboard entry, on-chain record or reward entitlement. The live round remains blind: author identity is withheld from verifiers until qualification even though the submitted research is intended for public release.
 
-## Public verification threshold
+Use the current [API interface](API.md) and [quickstart](QUICKSTART.md) for exact actions and environment availability. Policy terms are versioned; historical records without current public-release consent are not silently published.
 
-For the first 100 qualified improvements, a circuit needs at least 1,000,000 independently checked public inputs. From the 101st onward, the target is at least 10,000,000. Assigned work is completed by eligible independent verifiers under the server's frozen protocol; the author cannot choose inputs or substitute a local run. The author and server 10,048-input prechecks do not count toward this public threshold. Zero reviewed errors and no unresolved scientific dispute are required before qualification.
+## Compact submission boundary
 
-## Transfer rule in this GitHub kit
-
-`build` keeps a full `ops.bin` locally so the pinned verifier can run. The GitHub client uploads only `ops.qdelta` against an archived or publicly verified parent, plus the required reports and source archive. `check` and `submit` reject a full circuit. If `build-receipt.json` reports `delivery.mode: "full_circuit"`, inspect `deltaRejection`, record the attempt, and make a smaller incremental change from a closer publicly verified parent. Never edit a parent fingerprint or rename the binary to bypass the patch check. The server independently reconstructs and validates the full circuit.
-
-See the [live verification capability](https://dev.qcat.io/api/v1/research/verification), [challenge queue](https://dev.qcat.io/api/v1/challenges/ecc-point-addition/queue) and [API guide](API.md) for current state and routes. Public qualification, on-chain registration and reward payment must each be observed separately.
+The GitHub 0.10.5 client submits only a reproducible `ops.qdelta` tied to an archived or publicly verified parent. The complete `ops.bin` remains local for the pinned evaluator; the server reconstructs the same bytes from the parent and patch before independent verification. A `full_circuit` build receipt is a fail-closed submission result, not permission to upload the full file. This transport rule does not change correctness, score, public-verification or qualification requirements.

@@ -18,7 +18,7 @@ export async function init(folder,{baselinePath=null,empty=false}={}){
   for(const [source,target] of [['optimize.mjs','src/optimize.mjs'],['RESEARCH.md','RESEARCH.md'],['PROJECT-AGENTS.md','AGENTS.md'],['EXPERIMENT.md','experiments/EXPERIMENT-TEMPLATE.md']])await writeFile(join(folder,target),await readFile(join(templates,source)),{flag:'wx'});
   await writeFile(join(folder,'.gitignore'),'.qcat-run-contexts/\n.qcat-upload-state.json\nrun.log\nrun-report.json\nops.bin\nops.qdelta\nbaseline/ops.bin\nnode_modules/\n',{flag:'wx'});
   await writeFile(join(folder,'RUN-REPORT-REQUIRED.md'),'# Runtime report required\n\nPlace your actual completed machine-readable run report in run-report.json. A draft or not_run declaration cannot be submitted. See the kit guide and JSON Schema. Do not invent results.\n',{flag:'wx'});
-  const project={schemaVersion:BUNDLE_VERSION,taskId:'ecc-point-addition',taskVersion:TASK_VERSION,title:'',summary:'',ai:{usage:null,models:[]},provenance:{license:'',credits:'',links:[]},sharing:'private_review',artifacts:artifactRules.filter(x=>x.required).map(x=>({role:x.role,filename:x.example}))};
+  const project={schemaVersion:BUNDLE_VERSION,taskId:'ecc-point-addition',taskVersion:TASK_VERSION,title:'',summary:'',ai:{usage:null,models:[]},provenance:{license:'',credits:'',links:[]},sharing:'public',artifacts:artifactRules.filter(x=>x.required).map(x=>({role:x.role,filename:x.example}))};
   await writeFile(join(folder,'qcat.project.json'),JSON.stringify(project,null,2)+'\n',{flag:'wx'});
   if(baselinePath)return importBaseline(folder,baselinePath);
   if(empty)return null;
@@ -163,7 +163,7 @@ export async function submit(folder,options={}){
       if(!entry.uploaded){const stream=createReadStream(path);try{await request(base,key,'/research/uploads/'+entry.uploadId+'/content',{method:'POST',headers:{'content-type':'application/octet-stream','content-length':String(artifact.sizeBytes)},body:stream,duplex:'half',signal:AbortSignal.timeout(900000)});}finally{stream.destroy();}entry.uploaded=true;await persist();}
       options.onProgress?.(artifact.filename);
     }
-    const saved=await request(base,key,'/submissions',{method:'POST',headers:{'content-type':'application/json','idempotency-key':state.key},body:JSON.stringify({submissionFormat:'research-bundle-v1',manifest:prepared.manifest,uploads:Object.entries(state.uploads).map(([filename,u])=>({filename,uploadId:u.uploadId})),acknowledgeDevelopment:true})}).then(r=>r.json());
+    const saved=await request(base,key,'/submissions',{method:'POST',headers:{'content-type':'application/json','idempotency-key':state.key},body:JSON.stringify({submissionFormat:'research-bundle-v1',manifest:prepared.manifest,uploads:Object.entries(state.uploads).map(([filename,u])=>({filename,uploadId:u.uploadId})),acknowledgeDevelopment:true,acknowledgePublicSubmission:true})}).then(r=>r.json());
     state.submissionId=saved.id;await persist();return saved;
   }catch(error){if([404,410].includes(error.status)){state.uploads={};state.key=randomUUID();await persist();}throw error;}
 }

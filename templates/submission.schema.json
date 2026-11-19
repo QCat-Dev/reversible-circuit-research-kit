@@ -143,10 +143,7 @@
     },
     "sharing": {
       "type": "string",
-      "enum": [
-        "private_review",
-        "publish_after_qualification"
-      ]
+      "const": "public"
     },
     "artifacts": {
       "minItems": 6,
